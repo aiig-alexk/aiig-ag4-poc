@@ -14,11 +14,17 @@ async def get_weather(city: str) -> str:
 
 async def main() -> None:
     # Define an agent
+    my_api_key=os.getenv('OPENAI_API_KEY')
+    if my_api_key is None:
+        print("Environment variable 'OPENAI_API_KEY' is not set!")
+    else:
+        print(f"API Key: {my_api_key}")
+
     weather_agent = AssistantAgent(
         name="weather_agent",
         model_client=OpenAIChatCompletionClient(
             model="gpt-4o-2024-08-06",
-            api_key=os.getenv('OPEN_API_KEY')
+            api_key=my_api_key
         ),
         tools=[get_weather],
     )

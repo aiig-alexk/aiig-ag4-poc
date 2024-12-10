@@ -49,7 +49,6 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
 
     # Retrieve API key from environment variable
     pplx_api_key = os.getenv('PERPLEXITY_API_KEY')
-    # pplx_api_key = "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" # os.getenv('PERPLEXITY_API_KEY')
     if not pplx_api_key:
         raise ValueError("Perplexity API key not found. Set PERPLEXITY_API_KEY environment variable.")
     else:

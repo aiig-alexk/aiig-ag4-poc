@@ -1,7 +1,7 @@
 curl --location 'https://api.perplexity.ai/chat/completions' \
 --header 'accept: application/json' \
 --header 'content-type: application/json' \
---header 'Authorization: Bearer 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' \
+--header 'Authorization: Bearer {PPLX-API_KEY}' \
 --data '{
   "model": "llama-3.1-sonar-small-128k-online",
   "messages": [
