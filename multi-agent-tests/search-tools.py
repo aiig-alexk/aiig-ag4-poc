@@ -1,20 +1,15 @@
+
 # simple test to mimic risk analytic job. 
 # the analyst agent uses other agents (data, analytic, news, etc.) to complete the report
 # first iteration , copied from autogen LiteratureReview sample: https://microsoft.github.io/autogen/dev/user-guide/agentchat-user-guide/examples/literature-review.html
 
-
-from autogen_agentchat.agents import CodingAssistantAgent, ToolUseAssistantAgent
-from autogen_agentchat.conditions import TextMentionTermination
-from autogen_agentchat.teams import RoundRobinGroupChat
-from autogen_core.components.tools import FunctionTool
-from autogen_ext.models import OpenAIChatCompletionClient
-
-
 # define functions and tools
 
 import os
+import json
 from openai import OpenAI
 from typing import Optional
+from autogen_core.components.tools import FunctionTool
 
 ak_messages = [
     {
@@ -53,10 +48,12 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
     """
 
     # Retrieve API key from environment variable
-    # api_key = os.getenv('PERPLEXITY_API_KEY')
-    api_key = os.getenv('PERPLEXITY_API_KEY')
-    if not api_key:
+    pplx_api_key = os.getenv('PERPLEXITY_API_KEY')
+    # pplx_api_key = "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" # os.getenv('PERPLEXITY_API_KEY')
+    if not pplx_api_key:
         raise ValueError("Perplexity API key not found. Set PERPLEXITY_API_KEY environment variable.")
+    else:
+        print("PPLX API KEY lenght: " + pplx_api_key )
 
     # Construct a comprehensive query
     default_query = (
@@ -93,8 +90,9 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
 
     # Initialize Perplexity API client
     try:
+        # print("PPLX API KEY 2: " + pplx_api_key )
         client = OpenAI(
-            api_key=api_key, 
+            api_key=pplx_api_key, 
             base_url="https://api.perplexity.ai"
         )
 
@@ -129,8 +127,9 @@ if __name__ == "__main__":
     print("\n" + "="*50 + "\n")
 
     # Specific query: Argentina GDP
-    specific_result = perplexity_search("Japan", "What are the current GNI (Gross National Income) and Foreign Direct Investment (FDI) Inflows")
-    print(specific_result)
+    specific_result = perplexity_search("Argentina", "What are the current GNI (Gross National Income) and Foreign Direct Investment (FDI) Inflows")
+    formatted_result = json.dumps(specific_result, indent=4)
+    print(formatted_result)
 
     print("\n" + "="*50 + "\n")
    

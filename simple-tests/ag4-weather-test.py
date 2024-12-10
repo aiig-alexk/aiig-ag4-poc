@@ -1,4 +1,5 @@
 import asyncio
+import os
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.conditions import TextMentionTermination
 from autogen_agentchat.teams import RoundRobinGroupChat
@@ -17,7 +18,7 @@ async def main() -> None:
         name="weather_agent",
         model_client=OpenAIChatCompletionClient(
             model="gpt-4o-2024-08-06",
-            api_key="sk-proj-JZTbvHTUtg4GDAFafaRAT3BlbkFJIWW0Tt8yaXUqJbR5tLTd"
+            api_key=os.getenv('OPEN_API_KEY')
         ),
         tools=[get_weather],
     )
