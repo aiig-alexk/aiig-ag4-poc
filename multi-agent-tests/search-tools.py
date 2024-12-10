@@ -16,8 +16,6 @@ import os
 from openai import OpenAI
 from typing import Optional
 
-PERPLEXITY_API_KEY = "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"
-
 ak_messages = [
     {
         "role": "system",
@@ -53,9 +51,10 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
     Returns:
         str: Comprehensive search results from Perplexity API
     """
+
     # Retrieve API key from environment variable
     # api_key = os.getenv('PERPLEXITY_API_KEY')
-    api_key = PERPLEXITY_API_KEY
+    api_key = os.getenv('PERPLEXITY_API_KEY')
     if not api_key:
         raise ValueError("Perplexity API key not found. Set PERPLEXITY_API_KEY environment variable.")
 
@@ -76,10 +75,14 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
         {
             "role": "system", 
             "content": (
-                "You are an expert economic and political research analyst specializing in providing detailed, "
-                "up-to-date information about countries. Your responses should be "
-                "comprehensive, fact-based, and include relevant context and sources."
-                "Focus on verified, recent information from reputable international sources."
+                "You are an expert economic and political research analyst specializing in providing detailed up-to-date information about countries." 
+                "Your responses should be comprehensive, fact-based, and include relevant context and sources."
+                "Focus on verified, recent information from reputable international sources "
+                "such as: "
+                " - World Bank World Development Indicators (WDI): A comprehensive database of development indicators, including GDP growth, inflation, and trade statistics."
+                " - International Monetary Fund (IMF) World Economic Outlook (WEO): Provides economic analysis and projections for countries."
+                " - United Nations Statistics Division: Offers a range of economic indicators and statistics. "
+                " - CIA World Factbook: CIA World Factbook: provides basic intelligence on the history, people, government, economy, energy, geography, environment, communications, transportation, military, terrorism, and transnational issues for 265 world entities"
             )
         },
         {
