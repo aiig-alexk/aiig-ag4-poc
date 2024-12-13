@@ -54,13 +54,6 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
     else:
         print("PPLX API KEY lenght: " + pplx_api_key )
 
-    # Construct a comprehensive query
-    default_query = (
-        f"Provide a detailed and current analysis of {country}'s economic and political landscape. "
-        "Include recent GDP, economic indicators, major industries, government structure, "
-        "political developments, and international relations. "
-        "Ensure information is up-to-date and sourced from credible international reports."
-    )
     
     # Combine or use specific user query if provided
     # full_query = user_query or default_query
@@ -115,9 +108,11 @@ def perplexity_search(country: str, user_query: Optional[str] = None) -> list:
 
 
 # wrap the function into the tool
-perplexity_search_tool = FunctionTool(
-    perplexity_search, description="Search reputable inetrnet sites for recent news and up-to-date information, returns results with provided user quesry and search results"
+""""
+perplexity_search_tool = FunctionToolAlias(
+    perplexity_search, description="Search reputable inetrnet sites for recent news and up-to-date information using provided user_query, returns results with provided user query and search results"
 )
+"""
 
 
 # Example usage
