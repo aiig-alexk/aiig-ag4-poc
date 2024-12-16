@@ -161,10 +161,7 @@ economic_analysis_team = RoundRobinGroupChat(
     max_turns=16, 
 )
 
-async def main():
-
-    # Configure logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+async def create_SRA():
 
     report_task = """
         Create an accurate and comprehensive Sovereign Risk Analysis report for Argentina in 2024 and beyond.
@@ -177,13 +174,17 @@ async def main():
             print()
     """
 
-
+    # Run the team to create the report
     await Console(
         economic_analysis_team.run_stream(
             task=report_task,
         )
     )
 
+if __name__ == "__main__":
 
-import asyncio
-asyncio.run(main())
+       # Configure logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+
+    import asyncio
+    asyncio.run(create_SRA())
