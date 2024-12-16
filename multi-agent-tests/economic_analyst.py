@@ -1,30 +1,39 @@
-import numpy as np
-import pandas as pd
-
 """
 economic_analyst.py
 
-This module contains functions and classes for economic analysis.
+This module contains functions and agents for economic analysis:
+    The senior analyst agent uses other junior agents (economic performance, fiscal policy, monetary polyci, etc.) to complete the report
 
-simple test to mimic risk analytic job. 
-the analyst agent uses other junior agents (data, analytic, news, etc.) to complete the report
-first iteration , copied from autogen LiteratureReview sample: https://microsoft.github.io/autogen/dev/user-guide/agentchat-user-guide/examples/literature-review.html
-
+first iteration: 
+    inspired by autogen LiteratureReview sample: https://microsoft.github.io/autogen/dev/user-guide/agentchat-user-guide/examples/literature-review.html
 """
 
 # Import necessary libraries
+import logging
+
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.conditions import TextMentionTermination
 from autogen_agentchat.teams import RoundRobinGroupChat
-from autogen_agentchat.ui import Console
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import OpenAIChatCompletionClient
+from autogen_agentchat.ui import Console
 
-# wrap the function into the tool
 from search_tools import perplexity_search
+
+logger = logging.getLogger(__name__)
+
+# ==================================================================================================
+model_for_agents = "gpt-4o"
+model_client_for_agents = OpenAIChatCompletionClient(model=model_for_agents)
+# ==================================================================================================
+
+
+# ==================================================================================================
+# wrap the search function into the tool
+# ==================================================================================================
 perplexity_search_tool = FunctionTool(
     perplexity_search, 
-    description="Search reputable inetrnet sites for recent news and up-to-date information using provided user_query, returns results with provided user query and search results"
+    description="Search reputable sources for recent and up-to-date information about provided country using user_query, return provided user_query and search results"
 )
 
 
@@ -49,7 +58,7 @@ economic_performance_system_prompt = """
 economic_performance_agent = AssistantAgent(
     name="economic_performance_agent",
     tools=[perplexity_search_tool],
-    model_client=OpenAIChatCompletionClient(model="gpt-4o"),
+    model_client=model_client_for_agents,
     description=economic_performance_agent_description,
     system_message=economic_performance_system_prompt,
 )
@@ -73,7 +82,7 @@ fiscal_analysis_system_prompt = """
 fiscal_analysis_agent = AssistantAgent(
     name="fiscal_analysis_agent",
     tools=[perplexity_search_tool],
-    model_client=OpenAIChatCompletionClient(model="gpt-4o"),
+    model_client=model_client_for_agents,
     description=fiscal_analysis_agent_description,
     system_message=fiscal_analysis_system_prompt,
 )
@@ -98,7 +107,7 @@ monetary_policy_system_prompt = """
 monetary_policy_agent = AssistantAgent(
     name="monetary_policy_agent",
     tools=[perplexity_search_tool],
-    model_client=OpenAIChatCompletionClient(model="gpt-4o"),
+    model_client=model_client_for_agents,
     description=monetary_policy_agent_description,
     system_message=monetary_policy_system_prompt,
 )
@@ -108,30 +117,36 @@ monetary_policy_agent = AssistantAgent(
 # ==================================================================================================
 
 report_generation_agent_description = """
-    a senior economic analyst agent that synthesizes information from junior agents to generate a comprehensive economic analysis report including executive summary.
+    a senior economic analyst agent that synthesizes information from junior agents to generate a comprehensive Sovereign Risk Analysis report and 
+    create an executive summary for investors and stakeholders.
 """
 
 report_generation_system_prompt = """
     You are a senior economic analyst for a large fixed income investment company. 
-    Your task is to synthesize information from junior agents on economic performance, fiscal analysis, and monetary policy to generate a comprehensive Sovereign risk analysis report. 
+    Your task is to synthesize information from other agents on economic performance, fiscal analysis, and monetary policy to generate a comprehensive Sovereign risk analysis report. 
     
-    Analyze the country's economic performance, fiscal policy, and monetary policy to provide a comprehensive assessment of the country's economic health and outlook.
-    Review the macroeconomic indicators, fiscal policy, and monetary policy to identify key trends, risks, and opportunities.
+    Using information provided by other agents: 
+    - Analyze the country's economic performance, fiscal policy, and monetary policy to provide a comprehensive assessment of the country's economic health and outlook.
+    - Review the macroeconomic indicators, fiscal policy, and monetary policy to identify key trends, risks, and opportunities.
 
     For Emergency Markets countries take into the coount that those countries are often characterized by more volatile economic growth. 
-    Therefore, analyze past economic performance and future growth prospects . High growth rates can improve debt sustainability, but volatility can increase risks.
+        Therefore, analyze past economic performance and future growth prospects. 
+        Note: high growth rates can improve debt sustainability, but volatility can increase risks.
 
-    Create detailed and comprehensive Sovereign Risk Analysis report that includes key findings, analysis, executive summary for policymakers, investors, and stakeholders.
-    Check the report for accuracy, coherence, and relevance to the country's current economic situation. 
-    Ask other agents for additional information if needed and ensure the report is coherent and well-researched.
+    - Create detailed and comprehensive Sovereign Risk Analysis report that includes key findings, analysis and forward looking statements. Include enough relevant metrics and statistics to make quantitative judgements.
+    - Check the report for accuracy, coherence, and relevance to the country's current economic situation. Include a list of references and sources used in the report.
+
+    - Create and include an executive summary that highlights the key findings, risks, and opportunities for investors and stakeholders. The final output should be of professional, wall street analyst quality
+
+    Ask other agents for any additional information as needed to ensure the report is coherent and well-researched.
 
     Respond 'TERMINATE' when task is complete.
 """
 
 report_generation_agent = AssistantAgent(
     name="report_generation_agent",
-    tools=[perplexity_search_tool],
-    model_client=OpenAIChatCompletionClient(model="gpt-4o"),
+    # tools=[perplexity_search_tool], - do not use tools for senior agent
+    model_client=model_client_for_agents,
     description=report_generation_agent_description,
     system_message=report_generation_system_prompt,
 )
@@ -143,26 +158,31 @@ report_generation_agent = AssistantAgent(
 economic_analysis_team = RoundRobinGroupChat(
     participants=[economic_performance_agent, fiscal_analysis_agent, monetary_policy_agent, report_generation_agent],
     termination_condition=TextMentionTermination("TERMINATE"),
-    max_turns=15,
+    max_turns=16, 
 )
 
 async def main():
 
+    # Configure logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+
     report_task = """
-        Create Sovereign risk analysis report for Argentina. 
+        Create an accurate and comprehensive Sovereign Risk Analysis report for Argentina in 2024 and beyond.
     """
     
+    """
     result_stream = economic_analysis_team.run_stream(task=report_task)
     async for message in result_stream:
-            print(f'**> {message} \n\n')
-
+            print(f"***> {message} \n\n")
+            print()
     """
+
+
     await Console(
         economic_analysis_team.run_stream(
             task=report_task,
         )
     )
-    """
 
 
 import asyncio
